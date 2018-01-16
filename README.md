@@ -1,2 +1,2 @@
-# webpack_bootsrap
+# webpack_bootstrap
 Starter kit, webpack bootstrap jquery
