@@ -9,10 +9,10 @@ var node_dir = __dirname + '/node_modules';
 
 
 const config = {
-  entry: './src/js/app.js',
+  entry: './src/app.js',
   output: { 
     path: path.resolve(__dirname, 'build'),
-    filename: 'js/bundle.js',
+    filename: 'bundle.js',
   },
   devtool: 'source-map',
   module: {
@@ -33,13 +33,15 @@ const config = {
       },
       {
         test: /\.(jpe?g|png)$/,
-        use: 
+        use: [
         {
           loader: 'file-loader',
           options: {
-            outputPath: './img/'
+            // outputPath: 'img/'
           }
-        }
+        },
+          'image-webpack-loader',
+        ]
       },
       {  
         test: /\.scss$/,
@@ -68,7 +70,8 @@ const config = {
             {
               loader: 'resolve-url-loader',
               options: {
-                debug: true
+                debug: true,
+                fail: true
               }
             },
             {
@@ -76,6 +79,61 @@ const config = {
                     sourceMap: true
                 }
             },
+          ],
+        })
+      },
+			{
+				test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+				loader: "url-loader?limit=10000&mimetype=application/font-woff",
+        // options: { publicPath: '../' }
+			}, {
+				test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+				loader: "url-loader?limit=10000&mimetype=application/font-woff",
+        // options: { publicPath: '../' }
+			}, {
+				test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+				loader: "url-loader?limit=10000&mimetype=application/octet-stream",
+        // options: { publicPath: '../' }
+			}, {
+				test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+				loader: "file-loader",
+        // options: { publicPath: '../' }
+			}, {
+				test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+				loader: "url-loader?limit=10000&mimetype=image/svg+xml",
+        // options: { publicPath: '../' }
+			},
+      {  
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: [
+             {
+              loader: "css-loader", 
+               options: {
+                  sourceMap: true
+              }
+            },
+            {
+            loader: 'postcss-loader',
+            options: {
+              ident: 'postcss',
+              sourceMap: true,
+              plugins: (loader) => [
+                require('postcss-import')({ root: loader.resourcePath }),
+                require('autoprefixer')({ grid: true } ),
+                require('cssnano')({comments: {removeAll: true}}),
+                require('postcss-cssnext')()
+                ]
+              }
+            },
+            // {
+            //   loader: 'resolve-url-loader',
+            //   options: {
+            //     debug: true,
+            //     fail: true
+            //   }
+            // },
           ],
         })
       },
@@ -95,7 +153,7 @@ const config = {
         sourceMap: true
     }),
     new ExtractTextPlugin({
-      filename: './css/style.css',
+      filename: './style.css',
       // https://github.com/webpack-contrib/extract-text-webpack-plugin/issues/647
       allChunks: true // Enable this so postcssloader wont run twice if used in conjunction with extract-text plugin
     }),
