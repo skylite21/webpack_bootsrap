@@ -13,153 +13,95 @@ const config = {
   output: { 
     path: path.resolve(__dirname, 'build'),
     filename: 'js/bundle.js',
-    publicPath: ""
   },
+  devtool: 'source-map',
   module: {
-    rules: [
-      {
+    rules: [{
         use: 'babel-loader',
-        exclude: /node_modules/,
+        exclude: node_dir,
         test: /\.js$/
       },
       {
-        use: ExtractTextPlugin.extract({
-          fallback: "style-loader",
-          use: {
-            loader: 'css-loader',
-            options: {
-              minimize: false
-            }
+        // Exports HTML as string
+        test: /\.html$/,
+        use: {
+          loader:'html-loader',
+          options: {
+            minimize: true
           }
-        }),
-        test: /\.css$/
+        }
       },
-      {       
+      {
+        test: /\.(jpe?g|png)$/,
+        use: 
+        {
+          loader: 'file-loader',
+          options: {
+            outputPath: './img/'
+          }
+        }
+      },
+      {  
         test: /\.scss$/,
         use: ExtractTextPlugin.extract({
           fallback: "style-loader",
           use: [
              {
-              loader: "css-loader", options: {
-                  sourceMap: false
+              loader: "css-loader", 
+               options: {
+                  sourceMap: true
               }
-          },
-          {
+            },
+            {
             loader: 'postcss-loader',
             options: {
               ident: 'postcss',
+              sourceMap: true,
               plugins: (loader) => [
                 require('postcss-import')({ root: loader.resourcePath }),
                 require('autoprefixer')({ grid: true } ),
                 require('cssnano')({comments: {removeAll: true}}),
                 require('postcss-cssnext')()
-              ]
-            }
-          },
+                ]
+              }
+            },
+            {
+              loader: 'resolve-url-loader',
+              options: {
+                debug: true
+              }
+            },
             {
               loader: "sass-loader", options: {
-                  sourceMap: false
-            }
-          }],
+                    sourceMap: true
+                }
+            },
+          ],
         })
       },
-      //file loader
-      {
-				test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-				loader: "file-loader",
-        options: {
-          outputPath: 'assets/',
-          publicPath: '../'
-        }
-			},
-      //url loader
-      {
-        test:/\.(jpe?g|png|gif)$/,
-        use: [
-          {
-            loader: 'url-loader',
-            options: { 
-              limit: 1200,
-              outputPath: 'img/',
-              publicPath: '../'
-
-            }
-          },
-          'image-webpack-loader',
-        ]
-      },
-			{
-				test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          mimetype: 'application/font-woff',
-          outputPath: 'assets/',
-          publicPath: '../'
-        }
-			}, {
-				test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          mimetype: 'application/font-woff',
-          outputPath: 'assets/',
-          publicPath: '../'
-        }
-			}, {
-				test: /\.otf(\?v=\d+\.\d+\.\d+)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          mimetype: 'application/font-otf',
-          outputPath: 'assets/',
-          publicPath: '../'
-        }
-			}, {
-				test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          mimetype: 'application/octet-stream',
-          outputPath: 'assets/',
-          publicPath: '../'
-        }
-			}, 
-      {
-				test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          mimetype: 'image/svg+xml',
-          outputPath: 'assets/',
-          publicPath: '../'
-        }
-			},
-      {
-        test: /\.html$/,
-        use: {
-          loader:'html-loader',
-          options: {
-            minimize: false
-          }
-        }
-      }
-    ] 
-  },
+    ]},
   plugins: [
-    // find any files that where extracted and save it to this file
-    new ExtractTextPlugin('css/style.css'),
-    new webpack.ProvidePlugin({
-          $: 'jquery',
-          jQuery: 'jquery',
-          'window.jQuery': 'jquery',
-          Popper: ['popper.js', 'default']
-    }),
     new HtmlWebpackPlugin({
-        filename: './index.html',
-        template: 'src/index.html'
+      filename: 'index.html',
+      template: 'src/index.html',
     }),
-    new MinifyPlugin()
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
+      'window.jQuery': 'jquery',
+      Popper: ['popper.js', 'default']
+    }),
+      new webpack.optimize.UglifyJsPlugin({
+        sourceMap: true
+    }),
+    new ExtractTextPlugin({
+      filename: './css/style.css',
+      // https://github.com/webpack-contrib/extract-text-webpack-plugin/issues/647
+      allChunks: true // Enable this so postcssloader wont run twice if used in conjunction with extract-text plugin
+    }),
+    new webpack.LoaderOptionsPlugin({
+        debug: true
+    })
   ]
 };
 
